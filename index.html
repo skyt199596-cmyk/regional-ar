@@ -2,113 +2,87 @@
 <html>
   <head>
     <meta charset="utf-8">
-    <title>地域活性化WebARプロジェクト</title>
-    <!-- 安定動作する公式ライブラリの読み込み -->
+    <!-- スマホで見たときに画面の大きさをぴったり自動調整する設定 -->
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=no">
+    <title>地域活性化WebARプロジェクト - 地域AR動物園</title>
+
+    <!-- 0円でWebAR（空間固定・カメラ表示）を実現する軽量ライブラリ -->
     <script src="https://aframe.io/releases/1.4.2/aframe.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/gh/donmccurdy/aframe-extras@v6.1.1/dist/aframe-extras.min.js"></script>
-    
+
     <style>
-      html, body {
-        width: 100%;
-        height: 100%;
-        margin: 0;
-        padding: 0;
-        overflow: hidden;
-        background-color: transparent;
-      }
-      /* 背景のカメラ映像を最背面に固定する設定 */
-      #ar-webcam {
+      /* 画面上に簡単な案内を表示するデザイン */
+      #info-ui {
         position: fixed;
-        top: 0;
-        left: 0;
-        width: 100vw;
-        height: 100vh;
-        object-fit: cover;
-        z-index: -2;
-      }
-      .a-canvas {
-        background-color: transparent !important;
-      }
-      /* 全画面ボタンのデザイン */
-      #fullscreen-btn {
-        position: fixed;
-        bottom: 20px;
-        right: 20px;
-        z-index: 9999;
-        padding: 12px 20px;
-        background-color: #2196F3;
-        color: white;
-        border: none;
-        border-radius: 25px;
+        top: 10px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(0, 0, 0, 0.7);
+        color: #ffffff;
+        padding: 8px 16px;
+        border-radius: 20px;
+        font-family: sans-serif;
         font-size: 14px;
-        font-weight: bold;
-        cursor: pointer;
-        box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        z-index: 999;
+        pointer-events: none;
+        text-align: center;
       }
     </style>
   </head>
-  <body>
-    <!-- 背景に表示するカメラ映像 -->
-    <video id="ar-webcam" autoplay playsinline muted></video>
+  <body style="margin: 0; overflow: hidden;">
 
-    <!-- 全画面化ボタン -->
-    <button id="fullscreen-btn" onclick="toggleFullScreen()">全画面表示にする</button>
+    <!-- 画面上の案内テキスト -->
+    <div id="info-ui">📱 スマホを持って周りを見回したり、歩いてみよう！</div>
 
-    <!-- AR空間の作成 -->
+    <!-- AR空間のメインエリア -->
     <a-scene embedded vr-mode-ui="enabled: false">
       
-      <!-- 事前に読み込む画像素材の設定 -->
+      <!-- 【1. 素材（アセット）の読み込み】フォルダにあるファイルを事前に読み込みます -->
       <a-assets>
-        <img id="town-poster" src="poster.jpg" crossorigin="anonymous">
+        <img id="poster-img" src="poster.jpg">
+        <a-asset-item id="cow-model" src="Cow.glb"></a-asset-item>
+        <a-asset-item id="horse-model" src="Horse.glb"></a-asset-item>
+        <a-asset-item id="llama-model" src="Llama.glb"></a-asset-item>
+        <a-asset-item id="pig-model" src="Pig.glb"></a-asset-item>
+        <a-asset-item id="pug-model" src="Pug.glb"></a-asset-item>
+        <a-asset-item id="sheep-model" src="Sheep.glb"></a-asset-item>
+        <a-asset-item id="zebra-model" src="Zebra.glb"></a-asset-item>
       </a-assets>
 
-      <!-- 現実空間に浮遊固定されるオブジェクト群（カメラから奥に1.5mの位置） -->
-      <a-entity position="0 0 -1.5">
-        
-        <!-- ① 地域ポスター画像（color="#FFFFFF"で元の発色を維持 / width・heightで横長に調整） -->
-        <a-plane position="-0.5 0 0" width="1.2" height="0.6" color="#FFFFFF" src="#town-poster">
-        </a-plane>
+      <!-- 【2. 視点（カメラ）とセンサーの設定】 -->
+      <!-- スマホの向き（ジャイロセンサー）と動きに合わせて視点が移動します -->
+      <a-entity camera look-controls wasd-controls position="0 1.6 0"></a-entity>
 
-        <!-- ② 観光シンボル用の回転する3D立方体 -->
-        <a-box position="0.5 0 0" scale="0.25 0.25 0.25" color="#FF9800"
-               animation="property: rotation; to: 0 405 0; loop: true; dur: 5000">
-        </a-box>
+      <!-- 【3. 3Dオブジェクトとポスターの配置】 -->
+      <!-- position="横(X) 高さ(Y) 奥行き(Z)"（単位はメートルです） -->
+      <!-- rotation="X軸回転 Y軸回転 Z軸回転"（向きを調整できます） -->
 
-      </a-entity>
+      <!-- 🖼️ 正面3メートル前：地域ポスター看板 -->
+      <a-plane src="#poster-img" position="0 1.6 -3" width="2.0" height="2.8" rotation="0 0 0"></a-plane>
 
-      <!-- カメラ設定（デバイスの傾き・向きセンサーと連動） -->
-      <a-entity camera look-controls></a-entity>
+      <!-- 🐮 右手前（3m右、3m奥）：ウシ -->
+      <a-entity gltf-model="#cow-model" position="3 0 -3" scale="0.8 0.8 0.8" rotation="0 -45 0"></a-entity>
+
+      <!-- 🐴 左手前（3m左、3m奥）：ウマ -->
+      <a-entity gltf-model="#horse-model" position="-3 0 -3" scale="0.8 0.8 0.8" rotation="0 45 0"></a-entity>
+
+      <!-- 🐷 右（4m右）：ブタ -->
+      <a-entity gltf-model="#pig-model" position="4 0 0" scale="0.6 0.6 0.6" rotation="0 -90 0"></a-entity>
+
+      <!-- 🐑 左（4m左）：ヒツジ -->
+      <a-entity gltf-model="#sheep-model" position="-4 0 0" scale="0.6 0.6 0.6" rotation="0 90 0"></a-entity>
+
+      <!-- 🦓 右後ろ（3m右、4m後ろ）：シマウマ -->
+      <a-entity gltf-model="#zebra-model" position="3 0 4" scale="0.8 0.8 0.8" rotation="0 -135 0"></a-entity>
+
+      <!-- 🐶 左後ろ（3m左、4m後ろ）：パグ -->
+      <a-entity gltf-model="#pug-model" position="-3 0 4" scale="0.5 0.5 0.5" rotation="0 135 0"></a-entity>
+
+      <!-- 🦙 正面奥（8メートル奥）：歩いて見に行く目玉スポットのラマ！ -->
+      <a-entity gltf-model="#llama-model" position="0 0 -8" scale="1.0 1.0 1.0" rotation="0 0 0"></a-entity>
+
+      <!-- 背景をカメラ映像にするため無効化 -->
+      <a-sky visible="false"></a-sky>
     </a-scene>
 
-    <script>
-      // Webカメラの映像を取得して背景に流し込む処理
-      async function startCamera() {
-        try {
-          const stream = await navigator.mediaDevices.getUserMedia({
-            video: { facingMode: "environment" } // スマホの場合は背面カメラを優先起動
-          });
-          const videoElement = document.getElementById('ar-webcam');
-          videoElement.srcObject = stream;
-        } catch (err) {
-          console.error("カメラの起動に失敗しました:", err);
-        }
-      }
-
-      // ページ読み込み時にカメラを起動
-      window.addEventListener('load', startCamera);
-
-      // 全画面切り替えの処理
-      function toggleFullScreen() {
-        if (!document.fullscreenElement) {
-          document.documentElement.requestFullscreen().catch(err => {
-            alert(`全画面表示にできませんでした: ${err.message}`);
-          });
-        } else {
-          if (document.exitFullscreen) {
-            document.exitFullscreen();
-          }
-        }
-      }
-    </script>
   </body>
 </html>
